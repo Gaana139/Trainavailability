@@ -8,10 +8,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Running build automation'
-                //sh 'ps -ef'
-                //sh 'sudo chown -R root:root /var/lib/jenkins/workspace/TrainAvailability_main'
-                //sh 'sudo chown -R root:root /var/lib/jenkins/workspace/TrainAvailability_main@tmp'
-                //sh './gradlew build'
+                sh './gradlew npmInstall'
                 archiveArtifacts artifacts: 'dist/trainSchedule.zip'
             }
         }
