@@ -8,7 +8,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Running build automation'
-                ps -ef
+                sh 'ps -ef'
                 //sh 'sudo chown -R root:root /var/lib/jenkins/workspace/TrainAvailability_main'
                 //sh 'sudo chown -R root:root /var/lib/jenkins/workspace/TrainAvailability_main@tmp'
                 //sh './gradlew build'
