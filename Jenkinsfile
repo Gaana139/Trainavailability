@@ -8,13 +8,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Running build automation'
-                sh './gradlew build'
+                sh 'sudo chown -R root:root /var/lib/jenkins/workspace/TrainAvailability_main'
+                sh 'sudo chown -R root:root /var/lib/jenkins/workspace/TrainAvailability_main@tmp'
+                //sh './gradlew build'
                 archiveArtifacts artifacts: 'dist/trainSchedule.zip'
             }
         }
         stage('Build Docker Image') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
                 script {
@@ -27,7 +29,7 @@ pipeline {
         }
         stage('Push Docker Image') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
                 script {
@@ -40,7 +42,7 @@ pipeline {
         }
         stage('CanaryDeploy') {
             when {
-                branch 'master'
+                branch 'main'
             }
             environment { 
                 CANARY_REPLICAS = 1
@@ -55,7 +57,7 @@ pipeline {
         }
         stage('DeployToProduction') {
             when {
-                branch 'master'
+                branch 'main'
             }
             environment { 
                 CANARY_REPLICAS = 0
