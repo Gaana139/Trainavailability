@@ -8,7 +8,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Running build automation'
-                sh 'npm run build'
+                sh './gradlew clean'
             }
         }
         stage('Build Docker Image') {
