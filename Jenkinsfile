@@ -8,8 +8,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Running build automation'
-                sh './gradlew npm_build'
-                sh 'npm audit fix'
+                sh './gradlew npm_build --info'
                 archiveArtifacts artifacts: 'dist/trainSchedule.zip'
             }
         }
