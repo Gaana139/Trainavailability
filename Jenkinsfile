@@ -8,8 +8,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Running build automation'
-                sh './gradlew npm_build --info'
-                archiveArtifacts artifacts: 'dist/trainSchedule.zip'
+                sh 'npm run build'
             }
         }
         stage('Build Docker Image') {
