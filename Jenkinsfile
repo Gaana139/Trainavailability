@@ -3,6 +3,7 @@ pipeline {
     environment {
         //be sure to replace "bhavukm" with your own Docker Hub username
         DOCKER_IMAGE_NAME = "gana139/train-schedule"
+        DOCKERHUB_CREDENTIALS=credentials('docker_hub_login')
     }
     stages {
         stage('Build') {
@@ -18,22 +19,33 @@ pipeline {
             }
             steps {
                 script {
-                    app = docker.build(DOCKER_IMAGE_NAME)
-                    app.inside {
-                        sh 'echo Hello, World!'
-                    }
+                    sh 'docker version'
+                    sh "docker build -t gana139/train-node-app:${BUILD_NUMBER} ."
+				    sh 'docker image list'
+                    //app = docker.build(DOCKER_IMAGE_NAME)
+                    //app.inside {
+                        //sh 'echo Hello, World!'
+                   //}
                 }
             }
         }
+          stage('Login2DockerHub') {
+
+			steps {
+				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+			}
+		}
         stage('Push Docker Image') {
             when {
                 branch 'main'
             }
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
+                    //docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
+                        //app.push("${env.BUILD_NUMBER}")
+                        //app.push("latest")
+                    sh "docker -v"
+                        sh "docker push gana139/train-node-app:${BUILD_NUMBER}"
                     }
                 }
             }
