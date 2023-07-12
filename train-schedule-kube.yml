@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: train-schedule
-        image: gana139/train-node-app:3
+        image: gana139/train-node-app:5
         ports:
         - containerPort: 8080
         livenessProbe:
