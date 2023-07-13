@@ -9,14 +9,15 @@ pipeline {
         stage('SCM Checkout') {
             steps {
                 // Get some code from a GitHub repository
-                git 'https://github.com/Gaana139/Train_Pipeline.git'
+                git 'https://github.com/Gaana139/Trainavailability.git'
+                //git 'https://github.com/Gaana139/Train_Pipeline.git'
             }
 		}
         stage('Build') {
             steps {
                 echo 'Running build automation'
-                //sh './gradlew build --no-daemon'
-                //archiveArtifacts artifacts: 'dist/trainSchedule.zip'
+                sh './gradlew build --no-daemon'
+                archiveArtifacts artifacts: 'dist/trainSchedule.zip'
                 //sh 'gradle -v'
                 //archiveArtifacts artifacts: 'dist/trainSchedule.zip'
             }
@@ -26,13 +27,13 @@ pipeline {
             steps {
                 script {
                     sh 'docker version'
-                    sh "docker build -t gana139/train-node-app:${BUILD_NUMBER} ."
-				    sh 'docker image list'
+                    //sh "docker build -t gana139/train-node-app:${BUILD_NUMBER} ."
+				    //sh 'docker image list'
 				    //sh "docker tag gana139/train-node-app:${BUILD_NUMBER} gana139/train-node-app:latest"
-                    //app = docker.build(DOCKER_IMAGE_NAME)
-                    //app.inside {
-                        //sh 'echo Hello, World!'
-                    //}
+                    app = docker.build(DOCKER_IMAGE_NAME)
+                    app.inside {
+                        sh 'echo Hello, World!'
+                    }
                 }
             }
         }  
@@ -46,13 +47,13 @@ pipeline {
             
             steps {
                 script {
-                    //docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-                        //app.push("${env.BUILD_NUMBER}")
-                        //app.push("latest")
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push("latest")
                         sh "docker -v"
-                        sh "docker push gana139/train-node-app:${BUILD_NUMBER}"
+                        //sh "docker push gana139/train-node-app:${BUILD_NUMBER}"
                         
-                    //}
+                    }
                 }
             }
         }
@@ -62,13 +63,17 @@ pipeline {
                 CANARY_REPLICAS = 1
             }
             steps {
-                kubernetesDeploy(
-                    kubeconfigId: 'kubeconfig',
-                    configs: 'train-schedule-kube-canary.yml',
-                    enableConfigSubstitution: true
-                )
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'kubernetes_server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'kubectl apply -f train-schedule-kube-canary.yml', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '.', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'train-schedule-kube-canary.yml')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
             }
         } 
+        stage('DeployToProduction') {
+           environment { 
+                CANARY_REPLICAS = 0
+            } 
+            steps {
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'kubernetes_server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'kubectl apply -f train-schedule-kube.yml', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '.', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'train-schedule-kube.yml')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+            }
+        }
     }
     
 }
